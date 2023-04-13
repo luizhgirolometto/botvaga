@@ -3,6 +3,7 @@ import configparser
 from telebot import formatting
 from datetime import datetime
 import MySQLdb
+import createquery
 
 API_TOKEN = '6223925413:AAFfD803r7s-8uXduSqafafx5stuQKbXrDE'
 bot = telebot.TeleBot(API_TOKEN)
@@ -18,17 +19,6 @@ USERNAME = config.get('default', 'username')
 PASSWORD = config.get('default', 'password')
 DATABASE = config.get('default', 'database')
 
-def createquery(ans):
-    texto = ""
-    for i in ans:
-        id = i[0]
-        vaga = i[1]
-        descricao = i[2]
-        texto += "<b>" + str(id) + "</b> | " + "<b>" + str(vaga) + "</b> | " + "<b>" + str(
-            descricao) + "</b> | " + "<b>"  "</b>\n\n "
-    message = "<b>Recebido 📖 </b> informações sobre as vagas:\n\n" + texto
-    return message
-
 
 @bot.message_handler(commands=["vagas"])
 def vagas(mensagem):
@@ -36,11 +26,8 @@ def vagas(mensagem):
     res = crsr.fetchall()
 
     if (res):
-        texto = createquery(res)
+        texto = createquery.createquery(res)
         bot.send_message(mensagem.chat.id, texto)
-
-
-    # Otherwhise, print a default text
 
     else:
         texto = "Nenhuma vaga encontrada."
