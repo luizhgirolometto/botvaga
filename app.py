@@ -1,9 +1,12 @@
 import telebot
 import configparser
-from telebot import formatting
+from telebot import formatting,custom_filters
 from datetime import datetime
+
 import MySQLdb
 import createquery
+
+
 
 API_TOKEN = '6223925413:AAFfD803r7s-8uXduSqafafx5stuQKbXrDE'
 bot = telebot.TeleBot(API_TOKEN)
@@ -18,6 +21,28 @@ HOSTNAME = config.get('default', 'hostname')
 USERNAME = config.get('default', 'username')
 PASSWORD = config.get('default', 'password')
 DATABASE = config.get('default', 'database')
+
+
+@bot.message_handler(commands=["cadastrar"])
+def insert(mensagem):
+
+    idvaga = ""
+    telefone=""
+    email=""
+
+    texto = "Para se cadastrar na vaga digite o codigo da vaga disponivel em /vagas."
+    bot.send_message(mensagem.chat.id, formatting.format_text(formatting.mbold(texto)), parse_mode='MarkdownV2')
+
+    bot.set_my_commands(
+        commands=[
+            telebot.types.BotCommand('name1', 'description for name1'),
+            telebot.types.BotCommand('name2', 'description for name2'),
+            telebot.types.BotCommand('name3', 'description for name3')
+        ],
+        scope=telebot.types.BotCommandScopeChat(mensagem.chat.id))
+
+
+
 
 
 @bot.message_handler(commands=["vagas"])
@@ -54,8 +79,7 @@ def responder(mensagem):
     #envia msg de boas vindas
     bot.send_message(mensagem.chat.id, formatting.format_text(formatting.mbold(texto)),parse_mode='MarkdownV2')
 
-
-# Create database function
+    # Create database function
 def create_database(query):
     try:
         crsr_mysql.execute(query)
