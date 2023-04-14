@@ -1,6 +1,6 @@
 import telebot
 import configparser
-from telebot import formatting
+from telebot import formatting,types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from datetime import datetime
 
@@ -23,23 +23,28 @@ USERNAME = config.get('default', 'username')
 PASSWORD = config.get('default', 'password')
 DATABASE = config.get('default', 'database')
 
+class User:
+    def __init__(self, tel):
+        self.tel = tel
+        self.email = None
+
+
 
 @bot.message_handler(commands=["cadastrar"])
 def insert(mensagem):
     # Criar o formulário com os campos personalizados
 
+    msg = bot.send_message(mensagem.chat.id, "Vamos começar?, preencha o formulário abaixo \n\n"
+                                             "Primeiro o seu telefone?")
+    bot.register_next_step_handler(msg, get_tel)
 
-    mrkplink = InlineKeyboardMarkup()  # Created Inline Keyboard Markup
-    mrkplink.add(InlineKeyboardButton("Join our group 🚀", url="http://www.google.com.br" ))  # Added Invite Link to Inline Keyboard
-
-    msg = bot.send_message(mensagem.chat.id, "Por favor, preencha o formulário abaixo .")
-    bot.register_next_step_handler(msg, get_name)
-
-def get_name(mensagem):
-    # Pedir o nome do usuário
-
+def get_tel(mensagem):
+    # Pedir o telefone
+    tel = mensagem.text
     msg = bot.send_message(mensagem.chat.id, "Qual é o seu nome?")
     bot.register_next_step_handler(msg, get_email)
+
+    print(tel)
 
 
 def get_email(mensagem):
@@ -81,19 +86,16 @@ def start(mensagem):
 @bot.message_handler(func=start)
 def responder(mensagem):
 
-    name = mensagem.chat.first_name
+        bot.send_message(mensagem.chat.id,'Bem vindo  ao sistema de Vagas da Empresa:\n\n'
+                                     'VAGAS - LISTAR AS VAGAS \n'
+                                     'CADASTRO - CADASTRE-SE EM UMA VAGA \n'
+                                     'CONSULTA - CONSULTE A SUA CANDIDATURA \n \n')
 
+        chat_id = mensagem.chat.id
+        markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+        markup.add('/vagas','/cadastrar','/consulta')
+        msg = bot.send_message(mensagem.chat.id,'Escolha uma das opções abaixo:',reply_markup=markup)
 
-    texto =  "Bem vindo " + name + " ao sistema de Vagas da Empresa: \n \n" \
-             "Escolha uma das opções abaixo \n\n" \
-             "/vagas - Listar todas as vagas \n" \
-             "/cadastrar - Cadastre-se para uma vaga \n" \
-             "/consulta - Status da sua candidatura"
-
-    #envia msg de boas vindas
-    bot.send_message(mensagem.chat.id, formatting.format_text(formatting.mbold(texto)),parse_mode='MarkdownV2')
-
-    # Create database function
 def create_database(query):
     try:
         crsr_mysql.execute(query)
