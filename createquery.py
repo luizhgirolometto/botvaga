@@ -1,10 +1,14 @@
+import telebot
+from telebot import formatting
+
 def createquery(ans):
     texto = ""
     for i in ans:
         id = i[0]
-        vaga = i[1]
+        titulo = i[1]
         descricao = i[2]
-        texto += "<b>" + str(id) + "</b> | " + "<b>" + str(vaga) + "</b> | " + "<b>" + str(
-            descricao) + "</b> | " + "<b>"  "</b>\n\n "
-    message = "<b>Recebido 📖 </b> informações sobre as vagas:\n\n" + texto
+        data_publicacao = i[3]
+        texto += "Código " + str(id) + " | " +  str(titulo) + " | " +  str(descricao) + " | " + str(data_publicacao) + "\n\n"
+        message = "Recebido 📖 informações sobre as vagas:\n\n" + texto
+
     return message

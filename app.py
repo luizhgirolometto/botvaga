@@ -1,6 +1,7 @@
 import telebot
 import configparser
-from telebot import formatting,custom_filters
+from telebot import formatting
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from datetime import datetime
 
 import MySQLdb
@@ -25,24 +26,37 @@ DATABASE = config.get('default', 'database')
 
 @bot.message_handler(commands=["cadastrar"])
 def insert(mensagem):
-
-    idvaga = ""
-    telefone=""
-    email=""
-
-    texto = "Para se cadastrar na vaga digite o codigo da vaga disponivel em /vagas."
-    bot.send_message(mensagem.chat.id, formatting.format_text(formatting.mbold(texto)), parse_mode='MarkdownV2')
-
-    bot.set_my_commands(
-        commands=[
-            telebot.types.BotCommand('name1', 'description for name1'),
-            telebot.types.BotCommand('name2', 'description for name2'),
-            telebot.types.BotCommand('name3', 'description for name3')
-        ],
-        scope=telebot.types.BotCommandScopeChat(mensagem.chat.id))
+    # Criar o formulário com os campos personalizados
 
 
+    mrkplink = InlineKeyboardMarkup()  # Created Inline Keyboard Markup
+    mrkplink.add(InlineKeyboardButton("Join our group 🚀", url="http://www.google.com.br" ))  # Added Invite Link to Inline Keyboard
 
+    msg = bot.send_message(mensagem.chat.id, "Por favor, preencha o formulário abaixo .")
+    bot.register_next_step_handler(msg, get_name)
+
+def get_name(mensagem):
+    # Pedir o nome do usuário
+
+    msg = bot.send_message(mensagem.chat.id, "Qual é o seu nome?")
+    bot.register_next_step_handler(msg, get_email)
+
+
+def get_email(mensagem):
+    # Pedir o email do usuário
+    msg = bot.send_message(mensagem.chat.id, "Qual é o seu email?")
+    bot.register_next_step_handler(msg, get_telefone)
+
+
+def get_telefone(mensagem):
+    # Pedir o telefone do usuário
+    msg = bot.send_message(mensagem.chat.id, "Qual é o seu telefone?")
+    bot.register_next_step_handler(msg, end)
+
+
+def end(mensagem):
+    # Exibir uma mensagem de agradecimento e finalizar o formulário
+    bot.send_message(mensagem.chat.id, "Obrigado por preencher o formulário.")
 
 
 @bot.message_handler(commands=["vagas"])
@@ -114,5 +128,6 @@ if __name__ == '__main__':
 
     except Exception as error:
         print('Cause: {}'.format(error))
+
 
 bot.infinity_polling()
