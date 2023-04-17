@@ -9,7 +9,7 @@ import createquery
 
 
 
-API_TOKEN = '6223925413:AAFfD803r7s-8uXduSqafafx5stuQKbXrDE'
+API_TOKEN = '6184184377:AAHtglAH3eSPa9FmiLmEFAhtjRMWl9eaCYE'
 bot = telebot.TeleBot(API_TOKEN)
 
 ### Initializing Configuration
@@ -49,9 +49,6 @@ def get_vaga(mensagem):
     bot.register_next_step_handler(msg, get_tel)
     User.idvaga = mensagem.text
 
-    print(User.idvaga)
-
-
 
 def get_tel(mensagem):
     tel = mensagem.text
@@ -59,12 +56,12 @@ def get_tel(mensagem):
     msg = bot.send_message(mensagem.chat.id, "Qual é o seu email?")
     bot.register_next_step_handler(msg, end)
     User.tel = mensagem.text
-    print(User.tel)
+
 
 def end(mensagem):
 
     # Exibir uma mensagem de agradecimento e finalizar o formulário
-    bot.send_message(mensagem.chat.id, "Obrigado por preencher o formulário.")
+    bot.send_message(mensagem.chat.id, "Obrigado por preencher o formulário em breve entraremos em contato.")
     User.email = mensagem.text
     print(User.email)
 
@@ -73,21 +70,23 @@ def end(mensagem):
 
 def insert_data(mensagem):
 
-
-    fullname = mensagem.chat.first_name + mensagem.chat.last_name
+    #pega o nome completo
+    fullname = mensagem.chat.first_name +" "+ mensagem.chat.last_name
 
     vaga_id = int(User.idvaga)
     nome = fullname
     email = User.email
     telefone = User.tel
+    # Use a biblioteca datetime para obter a data (e formate-a como DIA/MÊS/ANO)
+    dt_string = datetime.now().strftime("%d/%m/%Y")
 
-    # create the tuple with all the params interted by the user
-    params = (vaga_id,nome,email,telefone)
+    # crie a tupla com todos os parâmetros informados pelo usuário
+    params = (vaga_id,nome,email,telefone,dt_string)
 
-    # Create the UPDATE query, we are updating the product with a specific id so we must put the WHERE clause
-    sql_command = "INSERT INTO candidaturas VALUES (%s, %s, %s, %s);"  # the initial NULL is for the AUTOINCREMENT id inside the table
-    crsr.execute(sql_command, params)  # Execute the query
-    conn.commit()  # Commit the changes
+    # Crie a consulta UPDATE, estamos atualizando o produto com um id específico então devemos colocar a cláusula WHERE
+    sql_command = "INSERT INTO candidaturas VALUES (NULL ,%s, %s, %s, %s, %s);"  # o NULL inicial é para o id AUTOINCREMENT dentro da tabela
+    crsr.execute(sql_command, params)  # Execute o comando
+    conn.commit()  # Commit as informações
 
     # If at least 1 row is affected by the query we send specific messages
     if crsr.rowcount < 1:
@@ -106,6 +105,10 @@ def vagas(mensagem):
     crsr.execute("SELECT * FROM vagas")
     res = crsr.fetchall()
 
+    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+    markup.add('/vagas', '/candidatar')
+    msg = bot.send_message(mensagem.chat.id, 'Escolha uma das opções abaixo:', reply_markup=markup)
+
     if (res):
         texto = createquery.createquery(res)
         bot.send_message(mensagem.chat.id, texto)
@@ -113,6 +116,7 @@ def vagas(mensagem):
     else:
         texto = "Nenhuma vaga encontrada."
         bot.send_message(mensagem.chat.id, formatting.format_text(formatting.mbold(texto)),parse_mode='MarkdownV2')
+
 
 
 ########################################################################################################################
@@ -125,19 +129,17 @@ def start(mensagem):
 @bot.message_handler(func=start)
 def responder(mensagem):
 
-        bot.send_message(mensagem.chat.id,'Bem vindo  ao sistema de Vagas da Empresa:\n\n'
-                                     'VAGAS - LISTAR AS VAGAS \n'
-                                     'CADASTRO - CADASTRE-SE EM UMA VAGA \n'
-                                     'CONSULTA - CONSULTE A SUA CANDIDATURA \n \n')
+        texto_menu = "Bem vindo ao sistema de vagas da Empresa X \n\n" \
+                     "VAGAS - VER VAGAS DISPONIVEIS \n" \
+                     "CANDIDATAR - ESCOLHA UMA VAGA \n" \
 
-        chat_id = mensagem.chat.id
+
+        bot.send_message(mensagem.chat.id,texto_menu )
         markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
-        markup.add('/vagas','/candidatar','/consulta')
+        markup.add('/vagas','/candidatar')
         msg = bot.send_message(mensagem.chat.id,'Escolha uma das opções abaixo:',reply_markup=markup)
 
-        print(mensagem.chat.first_name, mensagem.chat.last_name)
-
-
+#######################################################################################################################
 def create_database(query):
     try:
         crsr_mysql.execute(query)
